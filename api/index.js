@@ -14,6 +14,13 @@ if (!process.env.MONGO) {
   process.exit(1);
 }
 
+// Debug MongoDB URI (hide password)
+const debugUri = process.env.MONGO.replace(
+  /:([^@]+)@/,
+  ':****@'
+);
+console.log('Attempting to connect to MongoDB with URI:', debugUri);
+
 // MongoDB connection with detailed error logging
 mongoose
   .connect(process.env.MONGO)
@@ -26,6 +33,9 @@ mongoose
     console.error('Error code:', err.code);
     console.error('Error message:', err.message);
     if (err.codeName) console.error('Error codeName:', err.codeName);
+    
+    // Additional debugging info
+    console.error('Full error object:', JSON.stringify(err, null, 2));
     process.exit(1);
   });
 
