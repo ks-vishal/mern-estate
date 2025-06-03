@@ -14,7 +14,7 @@ mongoose
     console.log('Connected to MongoDB!');
   })
   .catch((err) => {
-    console.log(err);
+    console.log('MongoDB connection error:', err);
   });
 
 const __dirname = path.resolve();
@@ -25,21 +25,15 @@ app.use(express.json());
 
 app.use(cookieParser());
 
-const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}!`);
-});
-
 app.use('/api/user', userRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/listing', listingRouter);
-
 
 app.use(express.static(path.join(__dirname, '/client/dist')));
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'client', 'dist', 'index.html'));
-})
+});
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
@@ -49,4 +43,11 @@ app.use((err, req, res, next) => {
     statusCode,
     message,
   });
+});
+
+// Use Render's assigned port or fallback to 3001
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Server is running on port ${PORT}!`);
+  console.log('MongoDB URI:', process.env.MONGO ? 'Set' : 'Not Set');
 });
