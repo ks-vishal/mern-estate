@@ -138,8 +138,7 @@ mern-estate/
 │   │   ├── pages/
 │   │   ├── redux/
 │   │   └── App.jsx
-│   └── index.html
-├── .env               # Environment variables
+│   └── index.html             
 ├── .gitignore
 ├── docker-compose.yml
 ├── Dockerfile
