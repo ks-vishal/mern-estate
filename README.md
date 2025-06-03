@@ -155,8 +155,3 @@ mern-estate/
 ## License
 
 This project is licensed under the ISC License.
-
-## Contact
-
-Your Name - your.email@example.com
-Project Link: https://github.com/your-username/mern-estate
