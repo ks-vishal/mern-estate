@@ -1,54 +1,36 @@
-# Use Node.js image
-FROM node:18
+# Use Node.js as the base image
+FROM node:18-alpine
 
 # Set working directory
 WORKDIR /app
 
-# Copy package files
+# Copy package.json files first for better layer caching
 COPY package*.json ./
-COPY client/package*.json ./client/
 COPY api/package*.json ./api/
+COPY client/package*.json ./client/
 
 # Install dependencies
-RUN npm install
-WORKDIR /app/client
-RUN npm install
-WORKDIR /app/api
-RUN npm install
-WORKDIR /app
+RUN npm install \
+    && cd api && npm install \
+    && cd ../client && npm install
 
-# Copy the rest of the code
+# Copy the rest of the application
 COPY . .
 
-# Add these environment variables to make Vite work in Docker
-ENV HOST=0.0.0.0
-ENV PORT=5173
-
-# Expose necessary ports
-EXPOSE 5173 3001
-
-# Start the application
-CMD ["npm", "start"]
-
-# Build stage for React frontend
-FROM node:18 AS frontend-build
-WORKDIR /app/client
-COPY client/package*.json ./
-RUN npm install
-COPY client/ ./
-RUN npm run build
-
-# Production stage
-FROM node:18-slim
-WORKDIR /app
-COPY api/package*.json ./
-RUN npm install --production
-COPY api/ ./
-COPY --from=frontend-build /app/client/dist ./client/dist
+# Build the client application for production
+RUN cd client && npm run build
 
 # Set environment variables
 ENV PORT=3001
 ENV NODE_ENV=production
+ENV JWT_SECRET=your_jwt_secret_key
 
-EXPOSE 3001
-CMD ["node", "index.js"] 
+# Note: MongoDB connection string should be provided at runtime using:
+# docker run -e MONGO=mongodb+srv://user:password@cluster0.dsm1fkk.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0 ...
+
+# Expose ports for both backend and frontend
+EXPOSE 3001 5173
+
+# Start the application
+# In production, we serve the frontend from the backend
+CMD ["npm", "start"]
