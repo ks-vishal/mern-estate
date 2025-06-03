@@ -8,17 +8,28 @@ import cookieParser from 'cookie-parser';
 import path from 'path';
 dotenv.config();
 
+// Check if MONGO environment variable is set
+if (!process.env.MONGO) {
+  console.error('MONGO environment variable is not set!');
+  process.exit(1);
+}
+
+// MongoDB connection with detailed error logging
 mongoose
   .connect(process.env.MONGO)
   .then(() => {
     console.log('Connected to MongoDB!');
   })
   .catch((err) => {
-    console.log('MongoDB connection error:', err);
+    console.error('MongoDB connection error:');
+    console.error('Error name:', err.name);
+    console.error('Error code:', err.code);
+    console.error('Error message:', err.message);
+    if (err.codeName) console.error('Error codeName:', err.codeName);
+    process.exit(1);
   });
 
 const __dirname = path.resolve();
-
 const app = express();
 
 app.use(express.json());
@@ -45,9 +56,10 @@ app.use((err, req, res, next) => {
   });
 });
 
-// Use Render's assigned port or fallback to 3001
+// Start server
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on port ${PORT}!`);
-  console.log('MongoDB URI:', process.env.MONGO ? 'Set' : 'Not Set');
+  console.log('Environment:', process.env.NODE_ENV);
+  console.log('MongoDB URI status:', process.env.MONGO ? 'Set' : 'Not Set');
 });
